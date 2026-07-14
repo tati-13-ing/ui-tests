@@ -113,22 +113,6 @@ public final class TestConfig {
         );
     }
 
-    public static String getRequiredEnvironmentVariable(
-            String variableName
-    ) {
-        String value =
-                System.getenv(variableName);
-
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException(
-                    "Не задана переменная окружения: "
-                            + variableName
-            );
-        }
-
-        return value.trim();
-    }
-
     private static void loadProperties() {
         InputStream inputStream = TestConfig.class
                 .getClassLoader()
