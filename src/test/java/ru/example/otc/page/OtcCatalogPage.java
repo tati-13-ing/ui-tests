@@ -30,10 +30,10 @@ import static com.codeborne.selenide.WebDriverConditions.urlContaining;
 public class OtcCatalogPage {
 
     private static final Duration SHORT_TIMEOUT =
-            Duration.ofSeconds(5);
+            TestConfig.shortTimeout();
 
     private static final Duration PAGE_READY_TIMEOUT =
-            Duration.ofSeconds(30);
+            TestConfig.pageReadyTimeout();
 
     private static final Pattern PRICE_PATTERN =
             Pattern.compile(
@@ -41,7 +41,7 @@ public class OtcCatalogPage {
             );
 
     public void openCatalogPage() {
-        open("/");
+        open(TestConfig.homePath());
         $("body").shouldBe(visible);
 
         open(TestConfig.catalogPath());
@@ -59,11 +59,16 @@ public class OtcCatalogPage {
                 .shouldBe(enabled);
 
         webdriver().shouldHave(
-                urlContaining("/search/catalog")
+                urlContaining(
+                        TestConfig.catalogPath()
+                )
         );
     }
 
-    public void selectCity(String city) {
+    public void selectCity(
+            String city,
+            String previouslySelectedCity
+    ) {
         String expectedCity = normalizeText(city);
 
         SelenideElement citySelector =
@@ -80,7 +85,10 @@ public class OtcCatalogPage {
         CityDialog cityDialog =
                 new CityDialog(cityDialogElement);
 
-        cityDialog.selectOnlyCity(city);
+        cityDialog.selectOnlyCity(
+                city,
+                previouslySelectedCity
+        );
         cityDialog.apply();
 
         findCitySelector()
@@ -241,8 +249,7 @@ public class OtcCatalogPage {
 
         if (regionTarget.exists()) {
             return regionTarget
-                    .shouldBe(visible)
-                    .shouldHave(text("Москва"));
+                    .shouldBe(visible);
         }
 
         SelenideElement seoRegionSelector =
@@ -251,19 +258,6 @@ public class OtcCatalogPage {
                                 "contains(" +
                                 "@class," +
                                 "'SeoRegionSelector'" +
-                                ") and (" +
-                                ".//*[" +
-                                "normalize-space()='Москва'" +
-                                "] or " +
-                                ".//*[" +
-                                "normalize-space()='г. Москва'" +
-                                "] or " +
-                                ".//*[" +
-                                "normalize-space()='Краснодар'" +
-                                "] or " +
-                                ".//*[" +
-                                "normalize-space()='г. Краснодар'" +
-                                "]" +
                                 ")" +
                                 "][1]"
                 );

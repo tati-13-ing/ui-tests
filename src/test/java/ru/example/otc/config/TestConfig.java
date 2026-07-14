@@ -5,11 +5,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Properties;
 
 public final class TestConfig {
 
-    private static final Properties PROPERTIES = new Properties();
+    private static final String CONFIG_FILE =
+            "test.properties";
+
+    private static final Properties PROPERTIES =
+            new Properties();
 
     static {
         loadProperties();
@@ -22,53 +27,118 @@ public final class TestConfig {
         return getRequiredProperty("base.url");
     }
 
+    public static String homePath() {
+        return getRequiredProperty("endpoint.home");
+    }
+
     public static String catalogPath() {
-        return getRequiredProperty("catalog.path");
+        return getRequiredProperty("endpoint.catalog");
     }
 
     public static String browser() {
-        return PROPERTIES.getProperty(
+        return getProperty(
                 "browser",
                 "chrome"
-        ).trim();
+        );
     }
 
     public static boolean headless() {
-        String headlessValue = System.getProperty(
-                "headless",
-                PROPERTIES.getProperty("headless", "false")
+        return Boolean.parseBoolean(
+                getProperty(
+                        "headless",
+                        "false"
+                )
         );
-
-        return Boolean.parseBoolean(headlessValue);
     }
 
     public static String browserSize() {
-        return PROPERTIES.getProperty(
+        return getProperty(
                 "browser.size",
                 "1920x1080"
-        ).trim();
+        );
+    }
+
+    public static String pageLoadStrategy() {
+        return getProperty(
+                "page.load.strategy",
+                "eager"
+        );
+    }
+
+    public static long uiTimeoutMs() {
+        return getLongProperty(
+                "timeout.ui.ms"
+        );
+    }
+
+    public static long pageLoadTimeoutMs() {
+        return getLongProperty(
+                "timeout.page.load.ms"
+        );
+    }
+
+    public static Duration shortTimeout() {
+        return Duration.ofMillis(
+                getLongProperty("timeout.short.ms")
+        );
+    }
+
+    public static Duration pageReadyTimeout() {
+        return Duration.ofMillis(
+                getLongProperty("timeout.page.ready.ms")
+        );
     }
 
     public static String searchQuery() {
-        return getRequiredProperty("search.query");
+        return getRequiredProperty(
+                "test.search.query"
+        );
     }
 
     public static String searchCity() {
-        return getRequiredProperty("search.city");
+        return getRequiredProperty(
+                "test.search.city"
+        );
+    }
+
+    public static String initialCity() {
+        return getRequiredProperty(
+                "test.initial.city"
+        );
     }
 
     public static String outputFile() {
-        return getRequiredProperty("output.file");
+        return getRequiredProperty(
+                "output.file"
+        );
+    }
+
+    public static String getRequiredEnvironmentVariable(
+            String variableName
+    ) {
+        String value =
+                System.getenv(variableName);
+
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                    "Не задана переменная окружения: "
+                            + variableName
+            );
+        }
+
+        return value.trim();
     }
 
     private static void loadProperties() {
         InputStream inputStream = TestConfig.class
                 .getClassLoader()
-                .getResourceAsStream("test.properties");
+                .getResourceAsStream(CONFIG_FILE);
 
         if (inputStream == null) {
             throw new IllegalStateException(
-                    "Файл src/test/resources/test.properties не найден"
+                    "Файл src/test/resources/"
+                            + CONFIG_FILE
+                            + " не найден"
             );
         }
 
@@ -79,22 +149,75 @@ public final class TestConfig {
             PROPERTIES.load(reader);
         } catch (IOException exception) {
             throw new IllegalStateException(
-                    "Не удалось прочитать файл test.properties",
+                    "Не удалось прочитать файл "
+                            + CONFIG_FILE,
                     exception
             );
         }
     }
 
-    private static String getRequiredProperty(String propertyName) {
-        String value = PROPERTIES.getProperty(propertyName);
+    private static String getRequiredProperty(
+            String propertyName
+    ) {
+        String value = getProperty(
+                propertyName,
+                null
+        );
 
         if (value == null || value.isBlank()) {
             throw new IllegalStateException(
-                    "В test.properties не задан параметр: "
+                    "В "
+                            + CONFIG_FILE
+                            + " не задан параметр: "
                             + propertyName
             );
         }
 
-        return value.trim();
+        return value;
+    }
+
+    private static String getProperty(
+            String propertyName,
+            String defaultValue
+    ) {
+        String systemProperty =
+                System.getProperty(propertyName);
+
+        if (systemProperty != null
+                && !systemProperty.isBlank()) {
+
+            return systemProperty.trim();
+        }
+
+        String fileProperty =
+                PROPERTIES.getProperty(propertyName);
+
+        if (fileProperty != null
+                && !fileProperty.isBlank()) {
+
+            return fileProperty.trim();
+        }
+
+        return defaultValue;
+    }
+
+    private static long getLongProperty(
+            String propertyName
+    ) {
+        String value =
+                getRequiredProperty(propertyName);
+
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException exception) {
+            throw new IllegalStateException(
+                    "Параметр "
+                            + propertyName
+                            + " должен быть числом, "
+                            + "но получено: "
+                            + value,
+                    exception
+            );
+        }
     }
 }

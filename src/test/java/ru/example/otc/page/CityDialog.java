@@ -1,7 +1,7 @@
 package ru.example.otc.page;
 
 import com.codeborne.selenide.SelenideElement;
-
+import ru.example.otc.config.TestConfig;
 import java.time.Duration;
 
 import static com.codeborne.selenide.Condition.disappear;
@@ -12,7 +12,7 @@ import static com.codeborne.selenide.Condition.visible;
 public class CityDialog {
 
     private static final Duration SHORT_TIMEOUT =
-            Duration.ofSeconds(5);
+            TestConfig.shortTimeout();
 
     private final SelenideElement dialog;
 
@@ -20,8 +20,17 @@ public class CityDialog {
         this.dialog = dialog;
     }
 
-    public void selectOnlyCity(String city) {
-        String expectedCity = normalizeCityLabel(city);
+    public void selectOnlyCity(
+            String city,
+            String previouslySelectedCity
+    ) {
+        String expectedCity =
+                normalizeCityLabel(city);
+
+        String previousCity =
+                normalizeCityLabel(
+                        previouslySelectedCity
+                );
 
         clearSearch();
         clickCityCheckbox(expectedCity);
@@ -30,9 +39,11 @@ public class CityDialog {
                 .shouldBe(visible);
 
         clearSearch();
-        clickCityCheckbox("Москва");
+        clickCityCheckbox(previousCity);
 
-        dialog.shouldHave(text("Выбрано: 1"));
+        dialog.shouldHave(
+                text("Выбрано: 1")
+        );
     }
 
     public void apply() {

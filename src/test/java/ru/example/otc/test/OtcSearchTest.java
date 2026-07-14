@@ -51,7 +51,8 @@ class OtcSearchTest {
         catalogPage.openCatalogPage();
 
         catalogPage.selectCity(
-                TestConfig.searchCity()
+                TestConfig.searchCity(),
+                TestConfig.initialCity()
         );
 
         catalogPage.search(

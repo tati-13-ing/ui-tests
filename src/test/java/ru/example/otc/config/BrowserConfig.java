@@ -21,9 +21,14 @@ public final class BrowserConfig {
         Configuration.headless = TestConfig.headless();
         Configuration.browserSize = TestConfig.browserSize();
 
-        Configuration.pageLoadStrategy = "eager";
-        Configuration.pageLoadTimeout = 60_000;
-        Configuration.timeout = 5_000;
+        Configuration.pageLoadStrategy =
+                TestConfig.pageLoadStrategy();
+
+        Configuration.pageLoadTimeout =
+                TestConfig.pageLoadTimeoutMs();
+
+        Configuration.timeout =
+                TestConfig.uiTimeoutMs();
 
         Configuration.screenshots = false;
         Configuration.savePageSource = false;
