@@ -59,12 +59,7 @@ public class OtcCatalogSteps {
 
         products.addAll(firstPageProducts);
 
-        String firstProductLink =
-                catalogPage.firstProductLink();
-
-        catalogPage.openSecondPage(
-                firstProductLink
-        );
+        catalogPage.openSecondPage();
 
         List<Product> secondPageProducts =
                 catalogPage.collectProductsFromCurrentPage();

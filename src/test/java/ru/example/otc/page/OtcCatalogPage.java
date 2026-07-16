@@ -1,5 +1,6 @@
 package ru.example.otc.page;
 
+import com.codeborne.selenide.WebDriverRunner;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import ru.example.otc.config.TestConfig;
@@ -11,10 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.net.URI;
+import java.util.Arrays;
 
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.CollectionCondition.sizeGreaterThan;
-import static com.codeborne.selenide.Condition.attribute;
 import static com.codeborne.selenide.Condition.disappear;
 import static com.codeborne.selenide.Condition.enabled;
 import static com.codeborne.selenide.Condition.text;
@@ -26,6 +28,7 @@ import static com.codeborne.selenide.Selenide.executeJavaScript;
 import static com.codeborne.selenide.Selenide.open;
 import static com.codeborne.selenide.Selenide.webdriver;
 import static com.codeborne.selenide.WebDriverConditions.urlContaining;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OtcCatalogPage {
 
@@ -137,13 +140,8 @@ public class OtcCatalogPage {
         return products;
     }
 
-    public String firstProductLink() {
-        return getProductLinks()
-                .first()
-                .getAttribute("href");
-    }
 
-    public void openSecondPage(String firstProductLink) {
+    public void openSecondPage() {
         SelenideElement secondPageLink =
                 $$("a[href*='page=2']")
                         .filterBy(visible)
@@ -158,16 +156,47 @@ public class OtcCatalogPage {
                 urlContaining("page=2")
         );
 
-        if (firstProductLink != null) {
-            getProductLinks()
-                    .first()
-                    .shouldNotHave(
-                            attribute(
-                                    "href",
-                                    firstProductLink
-                            )
-                    );
+        String currentUrl =
+                WebDriverRunner.url();
+
+        assertEquals(
+                "2",
+                getQueryParameterValue(
+                        currentUrl,
+                        "page"
+                ),
+                "После перехода должна быть открыта " +
+                        "вторая страница. Текущий URL: " +
+                        currentUrl
+        );
+    }
+    private String getQueryParameterValue(
+            String url,
+            String parameterName
+    ) {
+        String query =
+                URI.create(url).getRawQuery();
+
+        if (query == null || query.isBlank()) {
+            return null;
         }
+
+        String parameterPrefix =
+                parameterName + "=";
+
+        return Arrays.stream(query.split("&"))
+                .filter(parameter ->
+                        parameter.startsWith(
+                                parameterPrefix
+                        )
+                )
+                .map(parameter ->
+                        parameter.substring(
+                                parameterPrefix.length()
+                        )
+                )
+                .findFirst()
+                .orElse(null);
     }
 
     private void enterSearchQuery(String query) {
