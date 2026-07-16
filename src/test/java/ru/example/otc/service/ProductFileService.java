@@ -63,32 +63,31 @@ public class ProductFileService {
                 "Текстовый файл не создан"
         );
 
-        List<String> lines =
+        List<String> actualLines =
                 Files.readAllLines(
                         outputFilePath,
                         StandardCharsets.UTF_8
                 );
 
-        assertEquals(
-                products.size(),
-                lines.size(),
-                "Количество строк в файле " +
-                        "не совпадает с количеством товаров"
-        );
-
         assertFalse(
-                lines.isEmpty(),
+                actualLines.isEmpty(),
                 "Файл с товарами пустой"
         );
 
-        assertTrue(
-                lines.stream().allMatch(
-                        line -> line.matches(
-                                ".+, \\d+(\\.\\d+)?"
-                        )
-                ),
-                "Строки должны быть в формате: " +
-                        "Строка, Число"
+        List<String> expectedLines = products
+                .stream()
+                .map(product ->
+                        product.name()
+                                + ", "
+                                + product.price()
+                                .toPlainString()
+                )
+                .toList();
+
+        assertEquals(
+                expectedLines,
+                actualLines,
+                "Содержимое файла не соответствует найденным товарам"
         );
     }
 }
