@@ -9,10 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class ProductFileService {
 
     private final Path outputFilePath;
@@ -55,39 +51,15 @@ public class ProductFileService {
         );
     }
 
-    public void checkOutputFile(
-            List<Product> products
-    ) throws IOException {
-        assertTrue(
-                Files.exists(outputFilePath),
-                "Текстовый файл не создан"
-        );
+    public boolean outputFileExists() {
+        return Files.exists(outputFilePath);
+    }
 
-        List<String> actualLines =
-                Files.readAllLines(
-                        outputFilePath,
-                        StandardCharsets.UTF_8
-                );
-
-        assertFalse(
-                actualLines.isEmpty(),
-                "Файл с товарами пустой"
-        );
-
-        List<String> expectedLines = products
-                .stream()
-                .map(product ->
-                        product.name()
-                                + ", "
-                                + product.price()
-                                .toPlainString()
-                )
-                .toList();
-
-        assertEquals(
-                expectedLines,
-                actualLines,
-                "Содержимое файла не соответствует найденным товарам"
+    public List<String> readLines()
+            throws IOException {
+        return Files.readAllLines(
+                outputFilePath,
+                StandardCharsets.UTF_8
         );
     }
 }

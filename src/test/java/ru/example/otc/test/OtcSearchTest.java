@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.util.List;
 
 import static com.codeborne.selenide.Selenide.closeWebDriver;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OtcSearchTest {
 
@@ -56,6 +59,39 @@ class OtcSearchTest {
 
         productFileService.writeProductsToFile(products);
 
-        productFileService.checkOutputFile(products);
+        assertOutputFileContains(products);
+    }
+
+    private void assertOutputFileContains(
+            List<Product> products
+    ) throws IOException {
+        assertTrue(
+                productFileService.outputFileExists(),
+                "Текстовый файл не создан"
+        );
+
+        List<String> actualLines =
+                productFileService.readLines();
+
+        assertFalse(
+                actualLines.isEmpty(),
+                "Файл с товарами пустой"
+        );
+
+        List<String> expectedLines = products
+                .stream()
+                .map(product ->
+                        product.name()
+                                + ", "
+                                + product.price()
+                                .toPlainString()
+                )
+                .toList();
+
+        assertEquals(
+                expectedLines,
+                actualLines,
+                "Содержимое файла не соответствует найденным товарам"
+        );
     }
 }
