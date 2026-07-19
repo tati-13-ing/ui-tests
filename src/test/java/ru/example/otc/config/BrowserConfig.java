@@ -16,10 +16,17 @@ public final class BrowserConfig {
     public static void configure() {
         disableCdpWarning();
 
-        Configuration.baseUrl = TestConfig.baseUrl();
-        Configuration.browser = TestConfig.browser();
-        Configuration.headless = TestConfig.headless();
-        Configuration.browserSize = TestConfig.browserSize();
+        Configuration.baseUrl =
+                TestConfig.baseUrl();
+
+        Configuration.browser =
+                TestConfig.browser();
+
+        Configuration.headless =
+                TestConfig.headless();
+
+        Configuration.browserSize =
+                TestConfig.browserSize();
 
         Configuration.pageLoadStrategy =
                 TestConfig.pageLoadStrategy();
@@ -30,15 +37,21 @@ public final class BrowserConfig {
         Configuration.timeout =
                 TestConfig.uiTimeoutMs();
 
-        Configuration.screenshots = false;
-        Configuration.savePageSource = false;
+        Configuration.remote =
+                TestConfig.remoteUrl();
+
+        Configuration.screenshots = true;
+        Configuration.savePageSource = true;
 
         Configuration.browserCapabilities =
                 createChromeOptions();
     }
 
+
+
     private static ChromeOptions createChromeOptions() {
-        ChromeOptions chromeOptions = new ChromeOptions();
+        ChromeOptions chromeOptions =
+                new ChromeOptions();
 
         chromeOptions.addArguments(
                 "--disable-geolocation",

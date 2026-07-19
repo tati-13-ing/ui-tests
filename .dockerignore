@@ -1,0 +1,15 @@
+.git
+.idea
+*.iml
+
+target
+build
+results
+
+README.md
+docker-compose.yml
+
+*.log
+
+.env
+.env.*

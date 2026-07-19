@@ -42,6 +42,12 @@ public final class TestConfig {
         );
     }
 
+    public static String remoteUrl() {
+        return getRequiredProperty(
+                "remote.url"
+        );
+    }
+
     public static boolean headless() {
         return Boolean.parseBoolean(
                 getProperty(
