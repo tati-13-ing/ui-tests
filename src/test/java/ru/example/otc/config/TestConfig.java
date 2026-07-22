@@ -35,12 +35,6 @@ public final class TestConfig {
         return getRequiredProperty("endpoint.catalog");
     }
 
-    public static String browser() {
-        return getProperty(
-                "browser",
-                "chrome"
-        );
-    }
 
     public static String remoteUrl() {
         return getRequiredProperty(

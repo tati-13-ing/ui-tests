@@ -1,26 +1,34 @@
 package ru.example.otc.config;
 
 import com.codeborne.selenide.Configuration;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public final class BrowserConfig {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(
+                    BrowserConfig.class
+            );
 
     private BrowserConfig() {
     }
 
     public static void configure() {
+        log.info(
+                "Начинаем настройку Selenide"
+        );
+
         disableCdpWarning();
 
         Configuration.baseUrl =
                 TestConfig.baseUrl();
-
         Configuration.browser =
-                TestConfig.browser();
+                RemoteChromeDriverProvider
+                        .class
+                        .getName();
 
         Configuration.headless =
                 TestConfig.headless();
@@ -37,56 +45,35 @@ public final class BrowserConfig {
         Configuration.timeout =
                 TestConfig.uiTimeoutMs();
 
-        Configuration.remote =
-                TestConfig.remoteUrl();
-
         Configuration.screenshots = true;
         Configuration.savePageSource = true;
 
-        Configuration.browserCapabilities =
-                createChromeOptions();
-    }
-
-
-
-    private static ChromeOptions createChromeOptions() {
-        ChromeOptions chromeOptions =
-                new ChromeOptions();
-
-        chromeOptions.addArguments(
-                "--disable-geolocation",
-                "--disable-notifications",
-                "--disable-popup-blocking",
-                "--lang=ru-RU"
+        log.info(
+                "Selenide настроен. " +
+                        "Base URL: {}, Grid: {}, " +
+                        "размер браузера: {}",
+                TestConfig.baseUrl(),
+                TestConfig.remoteUrl(),
+                TestConfig.browserSize()
         );
-
-        Map<String, Object> chromePreferences =
-                new HashMap<>();
-
-        chromePreferences.put(
-                "profile.default_content_setting_values.geolocation",
-                2
-        );
-
-        chromePreferences.put(
-                "profile.default_content_setting_values.notifications",
-                2
-        );
-
-        chromeOptions.setExperimentalOption(
-                "prefs",
-                chromePreferences
-        );
-
-        return chromeOptions;
     }
 
     private static void disableCdpWarning() {
-        Logger cdpLogger = Logger.getLogger(
-                "org.openqa.selenium.devtools.CdpVersionFinder"
+        log.info(
+                "Отключаем предупреждение Selenium CDP"
         );
+
+        java.util.logging.Logger cdpLogger =
+                java.util.logging.Logger.getLogger(
+                        "org.openqa.selenium.devtools." +
+                                "CdpVersionFinder"
+                );
 
         cdpLogger.setLevel(Level.OFF);
         cdpLogger.setUseParentHandlers(false);
+
+        log.info(
+                "Предупреждение Selenium CDP отключено"
+        );
     }
 }

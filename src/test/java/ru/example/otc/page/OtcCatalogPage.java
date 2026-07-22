@@ -29,8 +29,15 @@ import static com.codeborne.selenide.Selenide.open;
 import static com.codeborne.selenide.Selenide.webdriver;
 import static com.codeborne.selenide.WebDriverConditions.urlContaining;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OtcCatalogPage {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(
+                    OtcCatalogPage.class
+            );
 
     private static final Duration SHORT_TIMEOUT =
             TestConfig.shortTimeout();
@@ -44,8 +51,17 @@ public class OtcCatalogPage {
             );
 
     public void openCatalogPage() {
+        log.info(
+                "Открываем страницу каталога OTC"
+        );
+
         open(TestConfig.homePath());
         $("body").shouldBe(visible);
+
+        log.info(
+                "Главная страница OTC открыта, " +
+                        "переходим в каталог"
+        );
 
         open(TestConfig.catalogPath());
 
@@ -66,19 +82,44 @@ public class OtcCatalogPage {
                         TestConfig.catalogPath()
                 )
         );
+
+        log.info(
+                "Страница каталога OTC успешно открыта"
+        );
     }
 
     public void selectCity(
             String city,
             String previouslySelectedCity
     ) {
+        log.info(
+                "Начинаем выбор города. " +
+                        "Требуемый город: {}, " +
+                        "предыдущий город: {}",
+                city,
+                previouslySelectedCity
+        );
+
         String expectedCity = normalizeText(city);
 
         SelenideElement citySelector =
                 findCitySelector();
 
-        if (normalizeText(citySelector.text())
-                .contains(expectedCity)) {
+        String currentCity =
+                normalizeText(citySelector.text());
+
+        log.info(
+                "Текущий город на странице: {}",
+                currentCity
+        );
+
+        if (currentCity.contains(expectedCity)) {
+            log.info(
+                    "Город {} уже выбран, " +
+                            "повторный выбор не требуется",
+                    city
+            );
+
             return;
         }
 
@@ -92,23 +133,49 @@ public class OtcCatalogPage {
                 city,
                 previouslySelectedCity
         );
+
         cityDialog.apply();
 
         findCitySelector()
                 .shouldHave(text(expectedCity));
+
+        log.info(
+                "Город {} успешно выбран",
+                city
+        );
     }
 
     public void search(String query) {
+        log.info(
+                "Начинаем поиск по запросу: {}",
+                query
+        );
+
         enterSearchQuery(query);
         submitSearch();
+
+        log.info(
+                "Поиск по запросу {} выполнен",
+                query
+        );
     }
 
     public List<Product> collectProductsFromCurrentPage() {
+        log.info(
+                "Начинаем сбор товаров " +
+                        "с текущей страницы"
+        );
+
         List<Product> products =
                 new ArrayList<>();
 
         ElementsCollection productCards =
                 getProductCards();
+
+        log.info(
+                "На странице обнаружено карточек: {}",
+                productCards.size()
+        );
 
         for (int index = 0;
              index < productCards.size();
@@ -124,6 +191,12 @@ public class OtcCatalogPage {
                     productPrice(productCard);
 
             if (name.isBlank() || price == null) {
+                log.info(
+                        "Карточка с индексом {} пропущена: " +
+                                "не найдено название или цена",
+                        index
+                );
+
                 continue;
             }
 
@@ -134,14 +207,29 @@ public class OtcCatalogPage {
 
             if (!products.contains(product)) {
                 products.add(product);
+
+                log.info(
+                        "Добавлен товар: {}, цена: {}",
+                        product.name(),
+                        product.price()
+                );
             }
         }
+
+        log.info(
+                "С текущей страницы собрано товаров: {}",
+                products.size()
+        );
 
         return products;
     }
 
 
     public void openSecondPage() {
+        log.info(
+                "Переходим на вторую страницу результатов"
+        );
+
         SelenideElement secondPageLink =
                 $$("a[href*='page=2']")
                         .filterBy(visible)
@@ -159,6 +247,11 @@ public class OtcCatalogPage {
         String currentUrl =
                 WebDriverRunner.url();
 
+        log.info(
+                "URL после перехода: {}",
+                currentUrl
+        );
+
         assertEquals(
                 "2",
                 getQueryParameterValue(
@@ -169,22 +262,38 @@ public class OtcCatalogPage {
                         "вторая страница. Текущий URL: " +
                         currentUrl
         );
+
+        log.info(
+                "Вторая страница результатов открыта"
+        );
     }
+
     private String getQueryParameterValue(
             String url,
             String parameterName
     ) {
+        log.info(
+                "Получаем параметр {} из URL",
+                parameterName
+        );
+
         String query =
                 URI.create(url).getRawQuery();
 
         if (query == null || query.isBlank()) {
+            log.info(
+                    "В URL отсутствуют query-параметры"
+            );
+
             return null;
         }
 
         String parameterPrefix =
                 parameterName + "=";
 
-        return Arrays.stream(query.split("&"))
+        String value = Arrays.stream(
+                        query.split("&")
+                )
                 .filter(parameter ->
                         parameter.startsWith(
                                 parameterPrefix
@@ -197,6 +306,14 @@ public class OtcCatalogPage {
                 )
                 .findFirst()
                 .orElse(null);
+
+        log.info(
+                "Значение параметра {}: {}",
+                parameterName,
+                value
+        );
+
+        return value;
     }
 
     private void enterSearchQuery(String query) {
@@ -652,14 +769,31 @@ public class OtcCatalogPage {
     private void clickElement(
             SelenideElement element
     ) {
+        log.info(
+                "Выполняем нажатие на элемент"
+        );
+
         try {
             element
                     .shouldBe(visible)
                     .click();
+
+            log.info(
+                    "Элемент нажат обычным способом"
+            );
         } catch (RuntimeException clickError) {
+            log.info(
+                    "Обычное нажатие не сработало, " +
+                            "используем JavaScript click"
+            );
+
             executeJavaScript(
                     "arguments[0].click();",
                     element
+            );
+
+            log.info(
+                    "Элемент нажат через JavaScript"
             );
         }
     }

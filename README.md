@@ -2,9 +2,8 @@
 
 Учебный проект автоматизированного UI-тестирования каталога товаров сайта OTC.
 
-Проект полностью контейнеризирован. Java-код тестов, Maven, JUnit 5 и Selenide запускаются в одном Docker-контейнере, а Selenium Grid, ChromeDriver и Google Chrome — в другом.
+Тесты запускаются локально из IntelliJ IDEA, а браузер Google Chrome и ChromeDriver работают удалённо в Docker-контейнере с Selenium Grid.
 
-Локальный запуск тестов через установленную на компьютере Java, Maven или Chrome не используется.
 
 ## Проверяемый сценарий
 
@@ -17,7 +16,7 @@
 5. выполняет поиск;
 6. получает названия и цены найденных товаров;
 7. собирает результаты с первой и второй страниц;
-8. сохраняет полученные данные в текстовый файл;
+8. сохраняет найденные товары в текстовый файл;
 9. проверяет создание файла;
 10. проверяет, что файл не пустой;
 11. проверяет соответствие содержимого файла найденным товарам.
@@ -35,23 +34,35 @@ results/products.txt
 - JUnit 5;
 - Selenide;
 - Selenium WebDriver;
+- RemoteWebDriver;
 - Selenium Grid;
 - Google Chrome;
 - ChromeDriver;
+- Logback;
+- SLF4J;
 - Docker;
 - Docker Compose;
 - Xvfb;
 - VNC;
 - noVNC;
-- SLF4J Simple.
+- IntelliJ IDEA.
 
 ## Требования
 
-Для запуска проекта необходимы только:
+Перед запуском необходимо установить:
 
+- JDK 17;
+- IntelliJ IDEA;
 - Docker Engine;
-- Docker Compose;
-- доступ к интернету.
+- Docker Compose.
+
+Отдельно устанавливать Google Chrome и ChromeDriver для теста не требуется.
+
+Проверить Java:
+
+```bash
+java -version
+```
 
 Проверить Docker:
 
@@ -59,29 +70,31 @@ results/products.txt
 docker --version
 docker compose version
 ```
-
-## Сборка контейнера тестов
-
-Собрать образ сервиса `tests`:
+При первом запуске выполните:
 
 ```bash
-docker compose build tests
+docker compose pull
 ```
 
-Сначала запустить Selenium:
+Запустить контейнер:
 
 ```bash
-docker compose up -d selenium-chrome
+docker compose up -d
 ```
 
-Затем открыть в браузере:
+Проверить состояние:
+
+```bash
+docker compose ps
+```
+
+
+После запуска контейнера открыть:
 
 ```text
 http://127.0.0.1:7900/?autoconnect=1&resize=scale&password=secret
 ```
-
-После подключения запустить тест:
-
+Запустить тест
 ```bash
-docker compose run --rm tests
+mvn clean test
 ```

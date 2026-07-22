@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+    <!-- Папка, в которой создаются логи -->
+    <property
+            name="LOG_DIR"
+            value="logs"/>
+
+    <!-- Общий формат сообщений -->
+    <property
+            name="LOG_PATTERN"
+            value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{40} - %msg%n"/>
+
+    <!-- Вывод логов в консоль  -->
+    <appender
+            name="CONSOLE"
+            class="ch.qos.logback.core.ConsoleAppender">
+
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+
+    </appender>
+
+    <!-- Запись логов в отдельный файл -->
+    <appender
+            name="FILE"
+            class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <file>${LOG_DIR}/ui-tests.log</file>
+
+        <!-- Не удалять предыдущие записи при каждом запуске -->
+        <append>true</append>
+
+        <!-- Архивация по дате и размеру -->
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+
+            <fileNamePattern>
+                ${LOG_DIR}/archive/ui-tests.%d{yyyy-MM-dd}.%i.log.gz
+            </fileNamePattern>
+
+            <maxFileSize>10MB</maxFileSize>
+
+            <!-- Хранить архивы 14 дней -->
+            <maxHistory>14</maxHistory>
+
+            <!-- Общий предел архивов -->
+            <totalSizeCap>200MB</totalSizeCap>
+
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+
+    </appender>
+
+    <!-- Уменьшаем количество внутренних сообщений Selenium -->
+    <logger
+            name="org.openqa.selenium"
+            level="WARN"/>
+
+    <!-- Оставляем информационные сообщения Selenide -->
+    <logger
+            name="com.codeborne.selenide"
+            level="INFO"/>
+
+    <!-- Логи пишутся в консоль и файл -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>

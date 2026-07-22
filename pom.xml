@@ -12,14 +12,33 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>17</maven.compiler.release>
-        <slf4j.version>2.0.18</slf4j.version>
-        <selenide.version>7.16.2</selenide.version>
-        <junit.version>5.11.4</junit.version>
+        <project.build.sourceEncoding>
+            UTF-8
+        </project.build.sourceEncoding>
+
+        <maven.compiler.release>
+            17
+        </maven.compiler.release>
+
+        <selenide.version>
+            7.16.2
+        </selenide.version>
+
+        <selenium.version>
+            4.44.0
+        </selenium.version>
+
+        <junit.version>
+            5.11.4
+        </junit.version>
+
+        <logback.version>
+            1.5.38
+        </logback.version>
     </properties>
 
     <dependencies>
+
 
         <dependency>
             <groupId>com.codeborne</groupId>
@@ -28,6 +47,15 @@
             <scope>test</scope>
         </dependency>
 
+
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -35,10 +63,11 @@
             <scope>test</scope>
         </dependency>
 
+
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
             <scope>test</scope>
         </dependency>
 
