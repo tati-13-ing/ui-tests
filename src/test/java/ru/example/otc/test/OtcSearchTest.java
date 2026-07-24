@@ -9,7 +9,10 @@ import ru.example.otc.config.TestConfig;
 import ru.example.otc.model.Product;
 import ru.example.otc.service.ProductFileService;
 import ru.example.otc.steps.OtcCatalogSteps;
+import ru.example.otc.config.MinioClientConfig;
+import ru.example.otc.service.ProductS3StorageService;
 
+import java.nio.file.Path;
 import java.io.IOException;
 import java.util.List;
 
@@ -27,7 +30,13 @@ class OtcSearchTest {
             new ProductFileService(
                     TestConfig.outputFile()
             );
-
+    private final ProductS3StorageService
+            productS3StorageService =
+            new ProductS3StorageService(
+                    MinioClientConfig.createClient(),
+                    TestConfig.s3Bucket(),
+                    TestConfig.s3ObjectName()
+            );
     @BeforeAll
     static void setUp() {
         BrowserConfig.configure();
@@ -40,11 +49,11 @@ class OtcSearchTest {
 
     @Test
     @DisplayName(
-            "Поиск принтеров в Краснодаре " +
-                    "и сохранение результатов"
+            "Поиск принтеров в Краснодаре, " +
+                    "сохранение файла и загрузка в S3"
     )
     void shouldFindProductsAndSaveToFile()
-            throws IOException {
+            throws Exception {
 
         List<Product> products = catalogSteps
                 .openCatalog()
@@ -57,9 +66,23 @@ class OtcSearchTest {
                 )
                 .collectProductsFromFirstTwoPages();
 
-        productFileService.writeProductsToFile(products);
+        productFileService.writeProductsToFile(
+                products
+        );
 
-        assertOutputFileContains(products);
+        assertOutputFileContains(
+                products
+        );
+
+        productS3StorageService.uploadFile(
+                Path.of(
+                        TestConfig.outputFile()
+                )
+        );
+
+        assertS3ObjectContains(
+                products
+        );
     }
 
     private void assertOutputFileContains(
@@ -92,6 +115,39 @@ class OtcSearchTest {
                 expectedLines,
                 actualLines,
                 "Содержимое файла не соответствует найденным товарам"
+        );
+    }
+    private void assertS3ObjectContains(
+            List<Product> products
+    ) throws Exception {
+        assertTrue(
+                productS3StorageService.objectExists(),
+                "Файл не загружен в MinIO"
+        );
+
+        List<String> actualLines =
+                productS3StorageService.readLines();
+
+        assertFalse(
+                actualLines.isEmpty(),
+                "Объект в MinIO пустой"
+        );
+
+        List<String> expectedLines = products
+                .stream()
+                .map(product ->
+                        product.name()
+                                + ", "
+                                + product.price()
+                                .toPlainString()
+                )
+                .toList();
+
+        assertEquals(
+                expectedLines,
+                actualLines,
+                "Содержимое объекта в MinIO " +
+                        "не соответствует найденным товарам"
         );
     }
 }

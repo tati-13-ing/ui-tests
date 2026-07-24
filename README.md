@@ -21,11 +21,13 @@
 10. проверяет, что файл не пустой;
 11. проверяет соответствие содержимого файла найденным товарам.
 
-Результат сохраняется в:
+Результат сохраняется локально в:
 
 ```text
 results/products.txt
 ```
+После создания файл загружается в S3 хранилище MinIO
+
 
 ## Используемые технологии
 
@@ -46,6 +48,9 @@ results/products.txt
 - VNC;
 - noVNC;
 - IntelliJ IDEA.
+- - MinIO;
+- S3 API;
+- MinIO Java SDK;
 
 ## Требования
 
@@ -70,6 +75,14 @@ java -version
 docker --version
 docker compose version
 ```
+
+Создайте `.env` в корне проекта:
+
+```env
+MINIO_ROOT_USER=ваш_логин
+MINIO_ROOT_PASSWORD=ваш_пароль
+```
+
 При первом запуске выполните:
 
 ```bash
@@ -88,13 +101,25 @@ docker compose up -d
 docker compose ps
 ```
 
-
 После запуска контейнера открыть:
 
 ```text
 http://127.0.0.1:7900/?autoconnect=1&resize=scale&password=secret
 ```
+
 Запустить тест
 ```bash
-mvn clean test
+set -a && source .env && set +a && mvn clean test
+```
+
+S3 API:
+
+```text
+http://localhost:9000
+```
+
+Веб-интерфейс MinIO:
+
+```text
+http://localhost:9001
 ```

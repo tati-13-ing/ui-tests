@@ -112,7 +112,35 @@ public final class TestConfig {
                 "output.file"
         );
     }
+    public static String s3Endpoint() {
+        return getRequiredProperty(
+                "s3.endpoint"
+        );
+    }
 
+    public static String s3Bucket() {
+        return getRequiredProperty(
+                "s3.bucket"
+        );
+    }
+
+    public static String s3ObjectName() {
+        return getRequiredProperty(
+                "s3.object-name"
+        );
+    }
+
+    public static String minioRootUser() {
+        return getRequiredEnvironmentVariable(
+                "MINIO_ROOT_USER"
+        );
+    }
+
+    public static String minioRootPassword() {
+        return getRequiredEnvironmentVariable(
+                "MINIO_ROOT_PASSWORD"
+        );
+    }
     private static void loadProperties() {
         InputStream inputStream = TestConfig.class
                 .getClassLoader()
@@ -203,5 +231,20 @@ public final class TestConfig {
                     exception
             );
         }
+    }
+    private static String getRequiredEnvironmentVariable(
+            String variableName
+    ) {
+        String value =
+                System.getenv(variableName);
+
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                    "Не задана переменная окружения: "
+                            + variableName
+            );
+        }
+
+        return value.trim();
     }
 }
